@@ -7,6 +7,21 @@ YOFF=0
 XOFF=0
 FONT="Fira Sans 14"
 
+_rofi() {
+  rofi \
+    -dmenu \
+    -no-custom true \
+    -disable-history true \
+    -cycle true \
+    -p "Power" \
+    -sep '|' \
+    -location "$POSITION" \
+    -yoffset "$YOFF" \
+    -xoffset "$XOFF" \
+    -font "$FONT" \
+    "$@"
+}
+
 
 
 if [ -r "$DIR/config" ]; then
@@ -18,18 +33,30 @@ else
 fi
 
 LINES="Lock screen|Sleep|Log out|Power off|Restart"
-CHENTRY=$(echo "$LINES" | rofi -dmenu -no-custom -p "Power" -sep '|' -location "$POSITION" -yoffset "$YOFF" -xoffset "$XOFF" -font "$FONT")
+CHENTRY=$(echo "$LINES" | _rofi)
 
 if [ "$CHENTRY" = "Lock screen" ]; then
-  betterlockscreen -l
+  confirm=$(echo "yes|no" | _rofi -mesg "are you sure?")
+  if [ "$confirm" = "yes" ]; then
+    betterlockscreen -l
+  fi
 elif [ "$CHENTRY" = "Sleep"  ]; then
-  betterlockscreen -s
+  confirm=$(echo "yes|no" | _rofi -mesg "are you sure?")
+  if [ "$confirm" = "yes" ]; then
+    betterlockscreen -s
+  fi
 elif [ "$CHENTRY" = "Log out"  ]; then
   betterlockscreen -s
 elif [ "$CHENTRY" = "Power off"  ]; then
-  shutdown -h now
+  confirm=$(echo "yes|no" | _rofi -mesg "are you sure?")
+  if [ "$confirm" = "yes" ]; then
+    systemctl poweroff
+  fi
 elif [ "$CHENTRY" = "Restart"  ]; then
-  reboot
+  confirm=$(echo "yes|no" | _rofi -mesg "are you sure?")
+  if [ "$confirm" = "yes" ]; then
+    reboot
+  fi
 else
   echo "err"
 fi
